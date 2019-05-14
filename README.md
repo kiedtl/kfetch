@@ -1,6 +1,6 @@
-# kfetch
+![](https://lptstr.github.io/lptstr-images/proj/kfetch/current-edited.jpg)
 
-A clean looking, super fast fetch script for Linux forked from ufetch.
+> A clean looking, super fast fetch script for Linux.
 
 ### Goals
 
