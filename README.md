@@ -1,19 +1,30 @@
-<h1 align="center">kfetch</h1>
-<p align="center">A clean looking, super fast fetch script for Linux forked from ufetch.</p>
-<br>
-<h3 align="center">Goals</h3>
-<p>kfetch tries to be fast. <br>kfetch tries to be aesthetically pleasing at the same time. <br>The kfetch code should be readable, allowing for easy hacking.</p>
-<br>
-<h3 align="center">Problems with other scripts</h3>
-<p>pfetch looks too ugly.<br>ufetch is split into a hundred files, one for each distro.<br>aurafetch looks nice, but is too slow.<br>Screenfetch is a big hairy mess.<br>and Neofetch is too slow, too bloated, and too complex.</p>
-<br>
-<h3 align="center">Installation</h3>
-<pre>$ sudo curl "https://raw.githubusercontent.com/kiedtl/kfetch/master/kfetch" -o /usr/bin/kfetch
+# kfetch
+
+A clean looking, super fast fetch script for Linux forked from ufetch.
+
+### Goals
+
++ kfetch tries to be fast.  
++ kfetch tries to be aesthetically pleasing at the same time.  
++ The kfetch code should be readable, allowing for easy hacking.
+
+### Problems with other scripts
+
++ pfetch looks too ugly.  
++ ufetch is split into a hundred files, one for each distro.  
++ aurafetch looks nice, but is too slow.  
++ Screenfetch is a big hairy mess.  
++ and Neofetch is too slow, too bloated, and too complex.
+
+### Installation
+```
+$ sudo curl "https://raw.githubusercontent.com/kiedtl/kfetch/master/kfetch" -o /usr/bin/kfetch
 $ sudo chmod +x /usr/bin/kfetch
-</pre>
-<br>
-<h3 align="center">Benchmarks</h3>
-<pre>+kiedtl ~ (master +?) % hyperfine 'pfetch' 'kfetch' 'ufetch' 'rsfetch' 'aura' 'neofetch' 'screenfetch'
+```
+
+### Benchmarks
+```
++kiedtl ~ (master +?) % hyperfine 'pfetch' 'kfetch' 'ufetch' 'rsfetch' 'aura' 'neofetch' 'screenfetch'
 Benchmark #1: pfetch
   Time (mean ± σ):       4.7 ms ±   0.5 ms    [User: 3.3 ms, System: 1.9 ms]
   Range (min … max):     4.2 ms …   8.9 ms    426 runs
@@ -33,7 +44,7 @@ Benchmark #4: rsfetch
 Benchmark #5: aura
   Time (mean ± σ):      70.0 ms ±  43.8 ms    [User: 47.9 ms, System: 19.6 ms]
   Range (min … max):    54.7 ms … 215.5 ms    13 runs
-  
+
 Benchmark #6: neofetch
   Time (mean ± σ):     154.5 ms ±   4.2 ms    [User: 113.2 ms, System: 55.2 ms]
   Range (min … max):   149.3 ms … 168.7 ms    17 runs
@@ -51,4 +62,4 @@ Summary
   147.56 ± 40.79 times faster than 'neofetch'
   304.07 ± 114.47 times faster than 'screenfetch'
 
-</pre>
+```
