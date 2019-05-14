@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+#
+# kfetch - tiny system info for linux.
+
+export LC_ALL=C
+
+# ===== INFO =====
+
+# host
+host="$(< /etc/hostname)"
+
+# distro
+. /etc/os-release
+os="${PRETTY_NAME:-Linux}"
+
+# kernel
+#kernel="$(grep -Eo '^(([0-9])+\.?)+' /proc/version)"
+#kernel="${kernel/Linux version /}"
+kernel="$(read -r _ _ kernel _ < /proc/version)"
+
+# packages
+packages="$(pacman -Q | wc -l)"
+
+# shell
+shell="${SHELL##*/}"
+
+# model
+model="$(< /sys/devices/virtual/dmi/id/product_version) "
+model+="$(< /sys/devices/virtual/dmi/id/product_name)"
+model="${model//*O.E.M*}"
+
+# uptime
+s="$(< /proc/uptime)"
+s="${s/.*}"
+((d=s/60/60/24, h=s/60/60%24, m=s/60%60))
+((d)) && uptime+="${d}d "
+((h)) && uptime+="${h}h "
+((m)) && uptime+="${m}m"
+
+# wm/de
+if [ -n "${DE}" ]; then
+	ui="${DE}"
+	uitype='DE'
+elif [ -n "${WM}" ]; then
+	ui="${WM}"
+	uitype='WM'
+elif [ -n "${XDG_CURRENT_DESKTOP}" ]; then
+	ui="${XDG_CURRENT_DESKTOP}"
+	uitype='DE'
+elif [ -n "${DESKTOP_SESSION}" ]; then
+	ui="${DESKTOP_SESSION}"
+	uitype='DE'
+else
+    id="$(xprop -root -notype _NET_SUPPORTING_WM_CHECK)"
+    id="${id##* }"
+    wm="$(xprop -id "$id" -notype -len 100 -f _NET_WM_NAME 8t)"
+    wm="${wm/*WM_NAME = }"
+    wm="${wm/\"}"
+    ui="${wm/\"*}"
+	uitype='WM'
+# else
+	# ui='unknown'
+	# uitype='UI'
+fi
+
+# ===== DEFINE COLORS ======
+bold="[1m"
+black="[30m"
+red="[31m"
+green="[32m"
+yellow="[33m"
+blue="[34m"
+magenta="[35m"
+cyan="[36m"
+white="[37m"
+reset="(B[m"
+
+# you can change these, if you want
+lc="$reset$bold$blue"         # labels
+nc="$reset$bold$blue"         # user and hostname
+ic="$reset$bold$white"        # info
+c0="$reset$bold$blue"         # first color
+
+# ===== OUTPUT =====
+
+# For Arch users:
+#
+#        /\      
+#       /  \     
+#      /\   \    
+#     /  __  \   
+#    /  (  )  \  
+#   / __|  |__\\ 
+#  /.`        `.\
+
+echo "
+
+$c0      .--.      $nc$USER$ic@$nc$host$reset
+$c0     |o_o |     ${lc}OS:        $ic$os $kernel$reset
+$c0     |:_/ |     ${lc}MODEL:     $ic$model$reset
+$c0    //   \\ \\    ${lc}UPTIME:    $ic$uptime$reset
+$c0   (|     | )   ${lc}${uitype}:        $ic$ui$reset 
+$c0  /'\\_   _/\`\   ${lc}SHELL:     $ic$shell$reset
+$c0  \\___)=(___/   ${lc}PACKAGES:  $ic$packages (pacman)$reset
+
+"
+
+# EOF
