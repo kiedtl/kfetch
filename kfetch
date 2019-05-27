@@ -11,15 +11,10 @@ host="$(< /etc/hostname)"
 
 # distro
 . /etc/os-release
-os="${PRETTY_NAME:-Linux}"
+os="${NAME:-Linux}"
 
 # kernel
-#kernel="$(grep -Eo '^(([0-9])+\.?)+' /proc/version)"
-#kernel="${kernel/Linux version /}"
-kernel="$(read -r _ _ kernel _ < /proc/version)"
-
-# packages
-packages="$(pacman -Q | wc -l)"
+read -r s s kernel s < /proc/version
 
 # shell
 shell="${SHELL##*/}"
@@ -29,6 +24,20 @@ model="$(< /sys/devices/virtual/dmi/id/product_version) "
 model+="$(< /sys/devices/virtual/dmi/id/product_name)"
 model="${model//*O.E.M*}"
 
+# memory
+while IFS=: read -r a b; do
+    b=${b/kB}
+
+    case $a in
+        MemTotal)((mem_used+=b,mem_total=b)) ;;
+        Shmem)((mem_used+=b)) ;;
+        MemFree|Buffers|Cached|SReclaimable) ((mem_used-=b)) ;;
+    esac
+done </proc/meminfo
+
+((mem_used/=1024,mem_total/=1024))
+memory="${mem_used}MiB / ${mem_total}MiB"
+
 # uptime
 s="$(< /proc/uptime)"
 s="${s/.*}"
@@ -36,32 +45,6 @@ s="${s/.*}"
 ((d)) && uptime+="${d}d "
 ((h)) && uptime+="${h}h "
 ((m)) && uptime+="${m}m"
-
-# wm/de
-if [ -n "${DE}" ]; then
-	ui="${DE}"
-	uitype='DE'
-elif [ -n "${WM}" ]; then
-	ui="${WM}"
-	uitype='WM'
-elif [ -n "${XDG_CURRENT_DESKTOP}" ]; then
-	ui="${XDG_CURRENT_DESKTOP}"
-	uitype='DE'
-elif [ -n "${DESKTOP_SESSION}" ]; then
-	ui="${DESKTOP_SESSION}"
-	uitype='DE'
-else
-    id="$(xprop -root -notype _NET_SUPPORTING_WM_CHECK)"
-    id="${id##* }"
-    wm="$(xprop -id "$id" -notype -len 100 -f _NET_WM_NAME 8t)"
-    wm="${wm/*WM_NAME = }"
-    wm="${wm/\"}"
-    ui="${wm/\"*}"
-	uitype='WM'
-# else
-	# ui='unknown'
-	# uitype='UI'
-fi
 
 # ===== DEFINE COLORS ======
 bold="[1m"
@@ -93,15 +76,25 @@ c0="$reset$bold$blue"         # first color
 #   / __|  |__\\ 
 #  /.`        `.\
 
+# For Alpine users:
+#
+#        /\ 
+#       /  \ 
+#      / /\ \  /\ 
+#     / /  \ \/  \
+#    / /    \ \/\ \   
+#   / / /|   \ \ \ \ 
+#  /_/ /_|    \_\ \_\ 
+
 echo "
 
 $c0      .--.      $nc$USER$ic@$nc$host$reset
-$c0     |o_o |     ${lc}OS:        $ic$os $kernel$reset
-$c0     |:_/ |     ${lc}MODEL:     $ic$model$reset
-$c0    //   \\ \\    ${lc}UPTIME:    $ic$uptime$reset
-$c0   (|     | )   ${lc}${uitype}:        $ic$ui$reset 
-$c0  /'\\_   _/\`\   ${lc}SHELL:     $ic$shell$reset
-$c0  \\___)=(___/   ${lc}PACKAGES:  $ic$packages (pacman)$reset
+$c0     |o_o |     ${lc}OS:       $ic$os$reset
+$c0     |:_/ |     ${lc}SHELL:    $ic$shell$reset
+$c0    //   \\ \\    ${lc}MODEL:    $ic$model$reset
+$c0   (|     | )   ${lc}UPTIME:   $ic$uptime$reset 
+$c0  /'\\_   _/\`\   ${lc}MEMORY:   $ic$memory$reset
+$c0  \\___)=(___/   ${lc}KERNEL:   $ic${kernel}$reset
 
 "
 
