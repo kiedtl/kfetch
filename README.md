@@ -13,16 +13,24 @@
 + pfetch looks too ugly.  
 + ufetch is split into a hundred files, one for each distro.  
 + aurafetch looks nice, but is too slow.  
-+ Screenfetch is a big hairy mess.  
++ Screenfetch is a big hairy mess and just way to slow.  
 + and Neofetch is too slow, too bloated, and too complex.
 
 ### Installation
+With curl:
 ```
 $ sudo curl "https://raw.githubusercontent.com/kiedtl/kfetch/master/kfetch" -o /usr/bin/kfetch
 $ sudo chmod +x /usr/bin/kfetch
 ```
+With Git/`make`:
+```
+$ git clone git@github.com:kiedtl/kfetch.git
+$ cd kfetch && sudo make install
+$ cd .. && rm -rf ./kfetch
+```
 
 ### Benchmarks
+kfetch vs aura, pfetch, rsfetch, ufetch, neofetch and screenfetch
 ```
 +kiedtl ~ (master +?) % hyperfine 'pfetch' 'kfetch' 'ufetch' 'rsfetch' 'aura' 'neofetch' 'screenfetch'
 Benchmark #1: pfetch
