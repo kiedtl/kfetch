@@ -14,7 +14,10 @@
 + ufetch is split into a hundred files, one for each distro.  
 + aurafetch looks nice, but is too slow.  
 + Screenfetch is a big hairy mess and just way to slow.  
-+ and Neofetch is too slow, too bloated, and too complex.
++ Neofetch is too slow, too bloated, and too complex.
++ [rsfetch](https://github.com/rsfetch/rsfetch) is wonderful, but it's written in Rust and is thus not easily modified. I would highly recommend it over this project if you don't care about hackability.
+
++ besides, everybody has to write their own fetch script at some point :P
 
 ### Installation
 With curl:
