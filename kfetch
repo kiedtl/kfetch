@@ -89,12 +89,12 @@ c0="$reset$bold$blue"         # first color
 echo "
 
 $c0      .--.      $nc$USER$ic@$nc$host$reset
-$c0     |o_o |     ${lc}OS:       $ic$os$reset
-$c0     |:_/ |     ${lc}SHELL:    $ic$shell$reset
-$c0    //   \\ \\    ${lc}MODEL:    $ic$model$reset
-$c0   (|     | )   ${lc}UPTIME:   $ic$uptime$reset 
-$c0  /'\\_   _/\`\   ${lc}MEMORY:   $ic$memory$reset
-$c0  \\___)=(___/   ${lc}KERNEL:   $ic${kernel}$reset
+$c0     |o_o |     ${lc}OS: $ic$os$reset
+$c0     |:_/ |     ${lc}SH: $ic$shell$reset
+$c0    //   \\ \\    ${lc}MO: $ic$model$reset
+$c0   (|     | )   ${lc}UP: $ic$uptime$reset 
+$c0  /'\\_   _/\`\   ${lc}ME: $ic$memory$reset
+$c0  \\___)=(___/   ${lc}KE: $ic${kernel}$reset
 
 "
 
