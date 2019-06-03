@@ -12,6 +12,7 @@ host="$(< /etc/hostname)"
 # distro
 . /etc/os-release
 os="${NAME:-Linux}"
+[[ -f "/bedrock/etc/os-release" ]] && os="bedrock"
 
 # kernel
 read -r s s kernel s < /proc/version
