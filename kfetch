@@ -20,10 +20,12 @@ read -r s s kernel s < /proc/version
 # shell
 shell="${SHELL##*/}"
 
-# model
-model="$(< /sys/devices/virtual/dmi/id/product_version) "
-model+="$(< /sys/devices/virtual/dmi/id/product_name)"
-model="${model//*O.E.M*}"
+# mhost - proudly stolen from dylanaraps' pfetch! >:-)
+read -r name		< /sys/devices/virtual/dmi/id/product_name
+read -r version		< /sys/devices/virtual/dmi/id/product_version
+read -r model 		< /sys/firmware/devicetree/base/model
+mhost="$name $version $model"
+mhost="$(echo -e "${mhost}" | sed -e 's/^[[:space:]]*//')"
 
 # memory
 while IFS=: read -r a b; do
@@ -92,7 +94,7 @@ echo "
 $c0      .--.      $nc$USER$ic@$nc$host$reset
 $c0     |o_o |     ${lc}OS: $ic$os$reset
 $c0     |:_/ |     ${lc}SH: $ic$shell$reset
-$c0    //   \\ \\    ${lc}MO: $ic$model$reset
+$c0    //   \\ \\    ${lc}HO: $ic$mhost$reset
 $c0   (|     | )   ${lc}UP: $ic$uptime$reset 
 $c0  /'\\_   _/\`\   ${lc}ME: $ic$memory$reset
 $c0  \\___)=(___/   ${lc}KE: $ic${kernel}$reset
