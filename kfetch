@@ -1,55 +1,78 @@
-#!/usr/bin/env bash
+#!/bin/dash
 #
 # kfetch - tiny system info for linux.
+# (c) Kied Llaentenn
+# see the LICENSE for more information
+#
+# HISTORY: kfetch originally started out
+# as a combined version of Dylan Arap's pfe script
+# and ufetch, plus speed optimizations. Later,
+# I basically stole the pfetch code and customized it.
+# Now I reverted back to the old code base.
 
+# speed up script by not using Unicode
 export LC_ALL=C
 
 # ===== INFO =====
 
 # host
-host="$(< /etc/hostname)"
+host=$(cat /etc/hostname)
+
+# pkgs
+# !!! VOID LINUX ONLY !!!
+# you will have to modify this based on what 
+# OS you use.
+pkgs=$(xbps-query -l | wc -l)
 
 # distro
 . /etc/os-release
 os="${NAME:-Linux}"
-[[ -f "/bedrock/etc/os-release" ]] && os="bedrock"
+[ -f "/bedrock/etc/os-release" ] && os="bedrock"
 
 # kernel
-read -r s s kernel s < /proc/version
+read -r _ _ kernel _ < /proc/version
 
 # shell
 shell="${SHELL##*/}"
 
-# mhost - proudly stolen from dylanaraps' pfetch! >:-)
-read -r name		< /sys/devices/virtual/dmi/id/product_name
-read -r version		< /sys/devices/virtual/dmi/id/product_version
+# mhost - proudly stolen from dylanaraps' pfe! >:-)
+[ -f /sys/devices/virtual/dmi/id/product_name ] &&
+	read -r name		< /sys/devices/virtual/dmi/id/product_name
+
+[ -f /sys/devices/virtual/dmi/id/product_version ] &&
+	read -r version		< /sys/devices/virtual/dmi/id/product_version
+
 read -r model 		< /sys/firmware/devicetree/base/model
 mhost="$name $version $model"
-mhost="$(echo -e "${mhost}" | sed -e 's/^[[:space:]]*//')"
+mhost="$(echo "${mhost}" | sed -e 's/^[[:space:]]*//')"
 
 # memory
 while IFS=: read -r a b; do
-    b=${b/kB}
+    b=${b%%kB}
 
     case $a in
-        MemTotal)((mem_used+=b,mem_total=b)) ;;
-        Shmem)((mem_used+=b)) ;;
-        MemFree|Buffers|Cached|SReclaimable) ((mem_used-=b)) ;;
+        MemTotal) mem_used=$((mem_used+=b)) && mem_total=$((mem_total=b)) ;;
+        Shmem) mem_used=$((mem_used+=b)) ;;
+        MemFree|Buffers|Cached|SReclaimable) mem_used=$((mem_used-=b)) ;;
     esac
 done </proc/meminfo
 
-((mem_used/=1024,mem_total/=1024))
+mem_used=$((mem_used/=1024))
+mem_total=$((mem_total/=1024))
 memory="${mem_used}MiB / ${mem_total}MiB"
 
 # uptime
-s="$(< /proc/uptime)"
-s="${s/.*}"
-((d=s/60/60/24, h=s/60/60%24, m=s/60%60))
-((d)) && uptime+="${d}d "
-((h)) && uptime+="${h}h "
-((m)) && uptime+="${m}m"
+s="$(cat /proc/uptime)"
+s="${s%%.*}"
+d=$((s/60/60/24)) && h=$((s/60/60%24)) && m=$((s/60%60))
+[ "$d" = 0 ] || uptime="${uptime}${d}d "
+[ "$h" = 0 ] || uptime="${uptime}${h}h "
+[ "$m" = 0 ] || uptime="${uptime}${m}m"
+uptime=${uptime## }
 
 # ===== DEFINE COLORS ======
+
+# please don't change this!
 bold="[1m"
 black="[30m"
 red="[31m"
@@ -62,10 +85,10 @@ white="[37m"
 reset="(B[m"
 
 # you can change these, if you want
-lc="$reset$bold$blue"         # labels
-nc="$reset$bold$blue"         # user and hostname
-ic="$reset$bold$white"        # info
-c0="$reset$bold$blue"         # first color
+lc="$reset$bold$green"         # labels
+nc="$reset$bold$green"         # user and hostname
+ic="$reset$white"              # info
+c0="$reset$bold$green"         # first color
 
 # ===== OUTPUT =====
 
@@ -76,7 +99,7 @@ c0="$reset$bold$blue"         # first color
 #      /\   \    
 #     /  __  \   
 #    /  (  )  \  
-#   / __|  |__\\ 
+#   / __/  \__\\ 
 #  /.`        `.\
 
 # For Alpine users:
@@ -89,15 +112,42 @@ c0="$reset$bold$blue"         # first color
 #   / / /|   \ \ \ \ 
 #  /_/ /_|    \_\ \_\ 
 
+# For Void users:
+#
+#      -------
+#   _ \______ -
+#  | \  ___  \ |
+#  | | /   \ | |
+#  | | \___/ | |
+#  | \______ \_|
+#   -_______\
+
+# For generic users :P
+#
+#      .--.
+#     |o_o |
+#     |:_/ |
+#    //   \ \
+#   (|     | )
+#  /'\_   _/`\
+#  \---)=(---/
+
+# For bunnies:
+#
+# (\/)
+# ( . .)
+# c(")(")
+
+
 echo "
 
 $c0      .--.      $nc$USER$ic@$nc$host$reset
-$c0     |o_o |     ${lc}OS: $ic$os$reset
-$c0     |:_/ |     ${lc}SH: $ic$shell$reset
-$c0    //   \\ \\    ${lc}HO: $ic$mhost$reset
-$c0   (|     | )   ${lc}UP: $ic$uptime$reset 
-$c0  /'\\_   _/\`\   ${lc}ME: $ic$memory$reset
-$c0  \\___)=(___/   ${lc}KE: $ic${kernel}$reset
+$c0     |o_o |     ${lc}os      $ic$os$reset
+$c0     |:_/ |     ${lc}shell   $ic$shell$reset
+$c0    //   \\ \\    ${lc}pkgs    $ic$pkgs$reset
+$c0   (|     | )   ${lc}uptime  $ic$uptime$reset 
+$c0  /'\\_   _/\`\   ${lc}memory  $ic$memory$reset
+$c0  \\___)=(___/   ${lc}kernel  $ic${kernel}$reset
 
 "
 
