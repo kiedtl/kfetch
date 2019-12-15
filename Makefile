@@ -1,7 +1,7 @@
 # This makefile was proudly stolen from
 # https://github.com/dylanaraps/pash
 
-PREFIX ?= /usr
+PREFIX ?= /usr/local
 DOCDIR ?= $(PREFIX)/share/doc/kfetch
 
 all:
