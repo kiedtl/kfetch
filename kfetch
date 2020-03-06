@@ -3,149 +3,30 @@
 # kfetch - tiny system info for linux.
 # (c) Kied Llaentenn
 # see the LICENSE for more information
-#
-# HISTORY: kfetch originally started out
-# as a combined version of Dylan Arap's pfe script
-# and ufetch, plus speed optimizations. Later,
-# I basically stole the pfetch code and customized it.
-# Now I reverted back to the old code base.
 
-# speed up script by not using Unicode
-export LC_ALL=C
-
-# ===== INFO =====
-
-# host
-g_host() {
-	host=$(cat /etc/hostname)
-}
-
-# window manager
-g_wm() {
-	[ "${DISPLAY}" ] || {
-		wm='nah!';
-		return;
-	}
-	
-	command -v xprop>/dev/null 2>/dev/null || {
-		wm='xprop not found!'
-		return;
-	}
-
-	id=$(xprop -root -notype _NET_SUPPORTING_WM_CHECK)
-	id=${id##* }
-	wm=$(xprop -id "$id" -notype -len 25 -f _NET_WM_NAME 8t)
-	wm=${wm##*_NET_WM_NAME = \"}
-	wm=${wm%%\"*}
-}
-
-# pkgs
-# !!! VOID LINUX ONLY !!!
-# you will have to modify this based on what 
-# OS you use.
-g_pkgs() {
-	pkgs=$(xbps-query -l | wc -l)
-}
-
-# distro
-g_os() {
-	. /etc/os-release
-	os="${NAME:-Linux}"
-	[ -f "/bedrock/etc/os-release" ] && os="bedrock"
-}
-
-# kernel
-g_kernel() {
-	read -r _ _ kernel _ < /proc/version
-}
-
-# shell
-g_shell() {
-	shell="${SHELL##*/}"
-}
-
-# mhost - proudly stolen from dylanaraps' pfe! >:-)
-g_mhost() {
-	[ -f /sys/devices/virtual/dmi/id/product_name ] &&
-		read -r name		< /sys/devices/virtual/dmi/id/product_name
-	
-	[ -f /sys/devices/virtual/dmi/id/product_version ] &&
-		read -r version		< /sys/devices/virtual/dmi/id/product_version
-	
-	read -r model 		< /sys/firmware/devicetree/base/model
-	mhost="$name $version $model"
-	mhost="$(echo "${mhost}" | sed -e 's/^[[:space:]]*//')"
-}
-
-# memory
-g_memory() {
-	while IFS=: read -r a b; do
-		b=${b%%kB}
-
-		case $a in
-			MemTotal) mem_used=$((mem_used+=b)) && mem_total=$((mem_total=b)) ;;
-			Shmem) mem_used=$((mem_used+=b)) ;;
-			MemFree|Buffers|Cached|SReclaimable) mem_used=$((mem_used-=b)) ;;
-		esac
-	done </proc/meminfo
-
-	mem_used=$((mem_used/=1024))
-	mem_total=$((mem_total/=1024))
-	memory="${mem_used}MiB / ${mem_total}MiB"
-}
-
-# uptime
-g_uptime() {
-	s="$(cat /proc/uptime)"
-	s="${s%%.*}"
-	d=$((s/60/60/24)) && h=$((s/60/60%24)) && m=$((s/60%60))
-	[ "$d" = 0 ] || uptime="${uptime}${d}d "
-	[ "$h" = 0 ] || uptime="${uptime}${h}h "
-	[ "$m" = 0 ] || uptime="${uptime}${m}m"
-	uptime=${uptime## }
-}
-
-# ===== DEFINE COLORS ======
-
-# please don't change this!
-bold="[1m"
-black="[30m"
-red="[31m"
-green="[32m"
-yellow="[33m"
-blue="[34m"
-magenta="[35m"
-cyan="[36m"
-white="[37m"
-reset="(B[m"
-
-# you can change these, if you want
-lc="$reset$bold$green"         # labels
-nc="$reset$bold$green"         # user and hostname
-ic="$reset$white"              # info
-c0="$reset$bold$green"         # first color
+export LC_ALL=C;. /etc/os-release;k=`uname -r`;s=`cat /proc/uptime`;s=${s%%.*};d=$((s/86400));h=$((s/3600%24));m=$((s/60%60));[ $d = 0 ]||u="${u}${d}d ";[ $h = 0 ]||u="${u}${h}h ";[ $m = 0 ]||u="${u}${m}m";while IFS=: read -r a b;do b=${b%kB};case $a in MemTotal)x=$((x+=b));t=$((t=b));;Shmem)x=$((x+=b));;MemFree|Buffers|Cached|SReclaimable)x=$((x-=b));;esac;done</proc/meminfo;x=$((x/=1024));t=$((t/=1024))
 
 # ===== OUTPUT =====
 
 # For Arch users:
 #
-#        /\      
-#       /  \     
-#      /\   \    
-#     /  __  \   
-#    /  (  )  \  
-#   / __/  \__\\ 
+#        /\
+#       /  \
+#      /\   \
+#     /  __  \
+#    /  (  )  \
+#   / __/  \__\\
 #  /.`        `.\
 
 # For Alpine users:
 #
-#        /\ 
-#       /  \ 
-#      / /\ \  /\ 
+#        /\
+#       /  \
+#      / /\ \  /\
 #     / /  \ \/  \
-#    / /    \ \/\ \   
-#   / / /|   \ \ \ \ 
-#  /_/ /_|    \_\ \_\ 
+#    / /    \ \/\ \
+#   / / /|   \ \ \ \
+#  /_/ /_|    \_\ \_\
 
 # For Void users:
 #
@@ -157,7 +38,7 @@ c0="$reset$bold$green"         # first color
 #  | \______ \_|
 #   -_______\
 
-# For generic users :P
+# other
 #
 #      .--.
 #     |o_o |
@@ -173,26 +54,14 @@ c0="$reset$bold$green"         # first color
 # ( . .)
 # c(")(")
 
-g_host
-g_os
-g_shell
-# g_pkgs
-# g_mhost
-g_wm
-g_uptime
-g_memory
-g_kernel
-
 echo "
-
-$c0      .--.      $nc$USER$ic@$nc$host$reset
-$c0     |o_o |     ${lc}os      $ic$os$reset
-$c0     |:_/ |     ${lc}shell   $ic$shell$reset
-$c0    //   \\ \\    ${lc}wm      $ic$wm$reset
-$c0   (|     | )   ${lc}uptime  $ic$uptime$reset 
-$c0  /'\\_   _/\`\   ${lc}memory  $ic$memory$reset
-$c0  \\___)=(___/   ${lc}kernel  $ic${kernel}$reset
-
+    ___     ${USER:-`id -nu`}@${HOSTNAME:-`hostname`}
+   (.· |    os      ${PRETTY_NAME:-?}
+   (<> |    uptime  $u
+  / __  \   editor  ${EDITOR:-?}
+ ( /  \ /|  shell   ${SHELL##*/}
+_/\ __)/_)  memory  ${x}MiB / ${t}MiB
+\/-____\/   kernel  $k
 "
 
 # EOF

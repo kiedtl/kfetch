@@ -2,18 +2,12 @@
 
 > A clean looking, super fast fetch script for Linux.
 
-### Goals
-
-+ kfetch tries to be fast.  
-+ kfetch tries to be aesthetically pleasing at the same time.  
-+ The kfetch code should be readable, allowing for easy hacking.
-
 ### Problems with other scripts
 
-+ pfetch looks too ugly.  
-+ ufetch is split into a hundred files, one for each distro.  
-+ aurafetch looks nice, but is too slow.  
-+ Screenfetch is a big hairy mess and just way to slow.  
++ golfetch looks too ugly.
++ ufetch is split into a hundred files, one for each distro.
++ aurafetch looks nice, but is too slow.
++ Screenfetch is a big hairy mess and just way to slow.
 + Neofetch is too slow, too bloated, and too complex.
 + [rsfetch](https://github.com/rsfetch/rsfetch) is wonderful, but it's written in Rust and is thus not easily modified. I would highly recommend it over this project if you don't care about hackability.
 
